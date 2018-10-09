@@ -4,19 +4,19 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import argonaut.Argonaut._
 import com.pointlogic.weaver.json._
-import com.pointlogic.weaver.service.BinaryService
+import com.pointlogic.weaver.service.SparkSessionService
 import de.heikoseeberger.akkahttpargonaut.ArgonautSupport._
 
 import scala.concurrent.ExecutionContext
 
-class BinaryRoute(implicit executionContext: ExecutionContext) {
-  private val binaryService: BinaryService = new BinaryService
+class SparkSessionRoute(implicit executionContext: ExecutionContext) {
+  private val sparkSessionService: SparkSessionService = new SparkSessionService
 
   def routes: Route = list
 
-  private def list: Route = path("binaries") {
+  private def list: Route = path("spark-sessions") {
     get {
-      onSuccess(binaryService.fetch.map(_.toList)) { extraction =>
+      onSuccess(sparkSessionService.fetch.map(_.toList)) { extraction =>
         complete(extraction)
       }
     }

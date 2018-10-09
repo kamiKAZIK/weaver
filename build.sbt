@@ -12,5 +12,7 @@ lazy val root = Project("weaver", file("."))
 
 lazy val jobApi = Project("job-api", file("job-api"))
 
+lazy val restApi = Project("rest-api", file("rest-api"))
+
 lazy val server = Project("server", file("server"))
-  .dependsOn(jobApi)
+  .dependsOn(jobApi, restApi)

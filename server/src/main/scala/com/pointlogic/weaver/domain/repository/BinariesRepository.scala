@@ -8,18 +8,18 @@ import slick.jdbc.JdbcProfile
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class BinariesRepository(val config: DatabaseConfig[JdbcProfile]) extends DatabaseProvider with BinariesTable {
-  import config.driver.api._
+class BinariesRepository(val config: DatabaseConfig[JdbcProfile])(implicit executionContext: ExecutionContext) extends DatabaseProvider with BinariesTable {
+  import config.profile.api._
 
   def insert(binary: Binary): Future[Int] = db.run(binaries += binary)
 
   def findAll: Future[Seq[Binary]] = db.run(binaries.result)
 
-  def findById(id: Long)(implicit executionContext: ExecutionContext): Future[Option[Binary]] = db
+  def findById(id: Long): Future[Option[Binary]] = db
     .run(binaries.filter(_.id === id).result)
     .map(_.headOption)
 
-  def findByName(name: String)(implicit executionContext: ExecutionContext): Future[Option[Binary]] = db
-    .run(binaries.filter(_.name === name).result)
+  def findByNameAndVersion(name: String, version: String): Future[Option[Binary]] = db
+    .run(binaries.filter(b => b.name === name && b.version === version).result)
     .map(_.headOption)
 }

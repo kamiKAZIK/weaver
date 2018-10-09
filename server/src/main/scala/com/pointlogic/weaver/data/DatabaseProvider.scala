@@ -4,6 +4,6 @@ import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
 trait DatabaseProvider {
-  val config: DatabaseConfig[JdbcProfile]
-  val db: JdbcProfile#Backend#Database = config.db
+  protected val config: DatabaseConfig[JdbcProfile]
+  protected val db: JdbcProfile#Backend#Database = config.db
 }
