@@ -6,7 +6,7 @@ version := "0.1"
 scalaVersion := "2.11.12"
 
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-http"   % "10.1.5",
+  "com.typesafe.akka" %% "akka-http" % "10.1.5",
   "com.typesafe.akka" %% "akka-stream" % "2.5.16",
   "com.typesafe.slick" %% "slick" % "3.2.3",
   "com.typesafe.slick" %% "slick-hikaricp" % "3.2.3",
