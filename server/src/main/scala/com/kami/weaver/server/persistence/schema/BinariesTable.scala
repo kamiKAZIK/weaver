@@ -1,15 +1,20 @@
-package com.pointlogic.weaver.data.schema
+package com.kami.weaver.server.persistence.schema
 
+import java.sql.Timestamp
 import java.time.LocalDateTime
 
-import com.pointlogic.weaver.data._
-import com.pointlogic.weaver.domain.model.Binary
+import com.kami.weaver.server.persistence.connection.DatabaseProvider
+import com.kami.weaver.server.persistence.model.Binary
+import slick.ast.BaseTypedType
 import slick.lifted.{Index, ProvenShape}
 
 trait BinariesTable { this: DatabaseProvider =>
   import config.profile.api._
 
-  protected class Binaries(tag: Tag) extends Table[Binary](tag, "BINARIES") {
+  private[BinariesTable] class Binaries(tag: Tag) extends Table[Binary](tag, "BINARIES") {
+    private[this] implicit val localDateTimeToTimestamp: BaseTypedType[LocalDateTime] =
+      config.profile.MappedColumnType.base[LocalDateTime, Timestamp](Timestamp.valueOf, _.toLocalDateTime)
+
     def id: Rep[Long] = column[Long]("ID", O.PrimaryKey, O.AutoInc)
     def name: Rep[String] = column[String]("NAME", O.Length(128))
     def version: Rep[String] = column[String]("VERSION", O.Length(32))

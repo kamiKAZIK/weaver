@@ -1,4 +1,4 @@
-package com.pointlogic.weaver.domain.model
+package com.kami.weaver.server.persistence.model
 
 import java.time.LocalDateTime
 

@@ -1,4 +1,4 @@
-package com.pointlogic.weaver.data
+package com.kami.weaver.server.persistence.connection
 
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
