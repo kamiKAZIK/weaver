@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import akka.stream.Materializer
-import com.kami.weaver.server.routing.BinaryRoute
+import com.kami.weaver.server.routing.{BinaryRoute, RouteManager}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -15,6 +15,8 @@ object InterfaceBinding {
       .bindAndHandle(
         pathPrefix("api") {
           BinaryRoute.routes
+        } ~ pathPrefix("job") {
+          RouteManager.routes
         },
         address
       )

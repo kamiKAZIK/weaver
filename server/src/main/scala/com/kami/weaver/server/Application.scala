@@ -3,7 +3,7 @@ package com.kami.weaver.server
 
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, Materializer}
-import com.kami.weaver.server.actor.{SchemaManagerActor, ServerLaunchActor}
+import com.kami.weaver.server.actor.{RouteManagerActor, SchemaManagerActor, ServerLaunchActor}
 import com.kami.weaver.server.util.ConfigurationProvider
 import com.typesafe.config.Config
 
@@ -19,6 +19,6 @@ object Application extends ConfigurationProvider {
     implicit val materializer: Materializer = ActorMaterializer()
 
     actorSystem
-      .actorOf(ServerLaunchActor.props(actorSystem.actorOf(SchemaManagerActor.props))) ! ServerLaunchActor.Start
+      .actorOf(ServerLaunchActor.props(actorSystem.actorOf(SchemaManagerActor.props), actorSystem.actorOf(RouteManagerActor.props))) ! ServerLaunchActor.Start
   }
 }

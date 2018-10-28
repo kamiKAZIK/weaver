@@ -2,29 +2,28 @@ package com.kami.weaver.server.actor
 
 import akka.actor.{Actor, ActorLogging, Props}
 import akka.pattern.pipe
-import com.kami.weaver.server.persistence.management.TableManager
+import com.kami.weaver.server.routing.RouteManager
 
-object SchemaManagerActor {
+object RouteManagerActor {
   case object SetUp
   case object SetUpCompleted
   case class SetUpFailed(e: Throwable)
 
-  def props: Props = Props(new SchemaManagerActor)
+  def props: Props = Props(new RouteManagerActor)
 }
 
-class SchemaManagerActor extends Actor
+class RouteManagerActor extends Actor
   with ActorLogging {
 
   import context.dispatcher
 
   override def receive: Receive = {
-    case SchemaManagerActor.SetUp =>
-      TableManager
-        .setUp
-        .map(_ => SchemaManagerActor.SetUpCompleted)
+    case RouteManagerActor.SetUp =>
+      RouteManager.register
+        .map(_ => RouteManagerActor.SetUpCompleted)
         .recover {
           case e: Throwable =>
-            SchemaManagerActor.SetUpFailed(e)
+            RouteManagerActor.SetUpFailed(e)
         }.pipeTo(sender)
     case _ =>
       log.error("Unknown message received!")

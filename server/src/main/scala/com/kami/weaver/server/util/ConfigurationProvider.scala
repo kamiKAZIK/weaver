@@ -6,11 +6,11 @@ import com.typesafe.config.{Config, ConfigFactory}
 
 trait ConfigurationProvider {
   def resolve(configFileName: Option[String]): Config = {
-    val defaultConfig = ConfigFactory.load()
-    configFileName.fold(defaultConfig.resolve())(fileName =>
+    val defaultConfig = ConfigFactory.load
+    configFileName.fold(defaultConfig.resolve)(fileName =>
       ConfigFactory.parseFile(Paths.get(fileName).toFile)
         .withFallback(defaultConfig)
-        .resolve()
+        .resolve
     )
   }
 }
