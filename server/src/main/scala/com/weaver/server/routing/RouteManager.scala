@@ -23,8 +23,10 @@ object RouteManager {
     val classLoader = new URLClassLoader(Array(new URL("file:///home/ekazakas/git/kami/weaver/example/target/scala-2.11/example_2.11-0.1-SNAPSHOT.jar")), getClass.getClassLoader)
 
     val services = ServiceLoader.load(classOf[ExecutionProvider], classLoader)
-    val session = SessionManager.get("test").session
-    session.sparkContext.addJar("file:///home/ekazakas/git/kami/weaver/example/target/scala-2.11/example_2.11-0.1-SNAPSHOT.jar")
-    services.foreach(service => register(service.provide(session)))
+    services.foreach(service => register(pathPrefix(Segment) { sessionName: String =>
+      val session = SessionManager.get(sessionName).session
+      session.sparkContext.addJar("file:///home/ekazakas/git/kami/weaver/example/target/scala-2.11/example_2.11-0.1-SNAPSHOT.jar")
+      service.provide(session)
+    }))
   }
 }

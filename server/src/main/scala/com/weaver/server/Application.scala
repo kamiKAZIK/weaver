@@ -3,7 +3,7 @@ package com.weaver.server
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, Materializer}
 import com.typesafe.config.Config
-import com.weaver.server.actor.{RouteManagerActor, SchemaManagerActor, ServerLaunchActor}
+import com.weaver.server.actor.{RouteManagerActor, SchemaManagerActor, ServerLaunchActor, SessionManagerActor}
 import com.weaver.server.configuration.ConfigurationProvider
 
 import scala.util.Try
@@ -18,6 +18,10 @@ object Application extends ConfigurationProvider {
     implicit val materializer: Materializer = ActorMaterializer()
 
     actorSystem
-      .actorOf(ServerLaunchActor.props(actorSystem.actorOf(SchemaManagerActor.props), actorSystem.actorOf(RouteManagerActor.props))) ! ServerLaunchActor.Start
+      .actorOf(ServerLaunchActor.props(
+        actorSystem.actorOf(SessionManagerActor.props),
+        actorSystem.actorOf(SchemaManagerActor.props),
+        actorSystem.actorOf(RouteManagerActor.props)
+      )) ! ServerLaunchActor.Start
   }
 }

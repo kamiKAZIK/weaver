@@ -13,17 +13,19 @@ object ServerLaunchActor {
   case class BindingSucceeded(address: InetSocketAddress)
   case class BindingFailed(e: Throwable)
 
-  def props(schemaManagerActor: ActorRef, routeManagerActor: ActorRef)(implicit materializer: Materializer): Props =
-    Props(new ServerLaunchActor(schemaManagerActor, routeManagerActor))
+  def props(sessionManagerActor: ActorRef, schemaManagerActor: ActorRef, routeManagerActor: ActorRef)(implicit materializer: Materializer): Props =
+    Props(new ServerLaunchActor(sessionManagerActor, schemaManagerActor, routeManagerActor))
 }
 
-class ServerLaunchActor(schemaManagerActor: ActorRef, routeManagerActor: ActorRef)(implicit materializer: Materializer) extends Actor
+class ServerLaunchActor(sessionManagerActor: ActorRef, schemaManagerActor: ActorRef, routeManagerActor: ActorRef)(implicit materializer: Materializer) extends Actor
   with ActorLogging {
 
   import context.{dispatcher, system}
 
   override def receive: Receive = {
     case ServerLaunchActor.Start =>
+      sessionManagerActor ! SessionManagerActor.SetUp
+    case SessionManagerActor.SetUpCompleted =>
       routeManagerActor ! RouteManagerActor.SetUp
     case ServerLaunchActor.Bind(address) =>
       InterfaceBinding.bind(address)
@@ -46,6 +48,9 @@ class ServerLaunchActor(schemaManagerActor: ActorRef, routeManagerActor: ActorRe
       system.terminate
     case SchemaManagerActor.SetUpFailed(e) =>
       log.error(e, "Failed to initialize database schema!")
+      system.terminate
+    case SessionManagerActor.SetUpFailed(e) =>
+      log.error(e, "Failed to setup pre-defined sessions!")
       system.terminate
     case _ =>
       log.error("Unknown message received!")

@@ -19,7 +19,8 @@ class RouteManagerActor extends Actor
 
   override def receive: Receive = {
     case RouteManagerActor.SetUp =>
-      RouteManager.register
+      RouteManager
+        .register
         .map(_ => RouteManagerActor.SetUpCompleted)
         .recover {
           case e: Throwable =>
