@@ -13,17 +13,19 @@ object ServerLaunchActor {
   case class BindingSucceeded(address: InetSocketAddress)
   case class BindingFailed(e: Throwable)
 
-  def props(sessionManagerActor: ActorRef, schemaManagerActor: ActorRef, routeManagerActor: ActorRef)(implicit materializer: Materializer): Props =
-    Props(new ServerLaunchActor(sessionManagerActor, schemaManagerActor, routeManagerActor))
+  def props(schemaManagerActor: ActorRef, packageManagerActor: ActorRef, sessionManagerActor: ActorRef, routeManagerActor: ActorRef)(implicit materializer: Materializer): Props =
+    Props(new ServerLaunchActor(schemaManagerActor, packageManagerActor, sessionManagerActor , routeManagerActor))
 }
 
-class ServerLaunchActor(sessionManagerActor: ActorRef, schemaManagerActor: ActorRef, routeManagerActor: ActorRef)(implicit materializer: Materializer) extends Actor
+class ServerLaunchActor(schemaManagerActor: ActorRef, packageManagerActor: ActorRef, sessionManagerActor: ActorRef, routeManagerActor: ActorRef)(implicit materializer: Materializer) extends Actor
   with ActorLogging {
 
   import context.{dispatcher, system}
 
   override def receive: Receive = {
     case ServerLaunchActor.Start =>
+      packageManagerActor ! PackageManagerActor.SetUp
+    case PackageManagerActor.SetUpCompleted =>
       sessionManagerActor ! SessionManagerActor.SetUp
     case SessionManagerActor.SetUpCompleted =>
       routeManagerActor ! RouteManagerActor.SetUp

@@ -6,8 +6,9 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import com.typesafe.config.Config
 import com.weaver.execution.api.ExecutionProvider
-import com.weaver.server.spark.SessionManager
+import com.weaver.server.spark.{PackageManager, SessionManager}
 
 import scala.collection.JavaConversions._
 import scala.concurrent.{ExecutionContext, Future}
@@ -19,14 +20,12 @@ object RouteManager {
 
   def register(route: Route): Unit = registry.add(route)
 
-  def register(implicit executionContext: ExecutionContext): Future[Unit] = Future {
-    val classLoader = new URLClassLoader(Array(new URL("file:///home/ekazakas/git/kami/weaver/example/target/scala-2.11/example_2.11-0.1-SNAPSHOT.jar")), getClass.getClassLoader)
+  def setUp(config: Config)(implicit executionContext: ExecutionContext): Future[Unit] = Future {
+    val classLoader = new URLClassLoader(PackageManager.list.map(new URL(_)).toArray, getClass.getClassLoader)
 
     val services = ServiceLoader.load(classOf[ExecutionProvider], classLoader)
     services.foreach(service => register(pathPrefix(Segment) { sessionName: String =>
-      val session = SessionManager.get(sessionName).session
-      session.sparkContext.addJar("file:///home/ekazakas/git/kami/weaver/example/target/scala-2.11/example_2.11-0.1-SNAPSHOT.jar")
-      service.provide(session)
+      service.provide(SessionManager.get(sessionName).session)
     }))
   }
 }

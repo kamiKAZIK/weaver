@@ -2,7 +2,7 @@ package com.weaver.server.actor
 
 import akka.actor.{Actor, ActorLogging, Props}
 import akka.pattern.pipe
-import com.weaver.server.spark.SessionManager
+import com.weaver.server.spark.{PackageManager, SessionManager}
 
 object SessionManagerActor {
   case object SetUp
@@ -19,7 +19,7 @@ class SessionManagerActor extends Actor
 
   override def receive: Receive = {
     case SessionManagerActor.SetUp =>
-      SessionManager.setUp(context.system.settings.config.getConfig("api-server"))
+      SessionManager.setUp(context.system.settings.config.getConfig("api-server"), PackageManager.list)
         .map(_ => SessionManagerActor.SetUpCompleted)
         .recover {
           case e: Throwable => SessionManagerActor.SetUpFailed(e)
