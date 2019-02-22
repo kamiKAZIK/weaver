@@ -1,25 +1,22 @@
 package com.weaver.server.spark
 
-import com.typesafe.config.{Config, ConfigValue}
+import com.typesafe.config.Config
 import org.apache.spark.sql.SparkSession
 
-import scala.collection.concurrent.TrieMap
 import scala.collection.JavaConversions._
+import scala.collection.concurrent.TrieMap
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 object SessionManager {
   val registry: TrieMap[String, SessionManager] = TrieMap.empty
 
   def setUp(config: Config, packages: Set[String])(implicit executionContext: ExecutionContext): Future[Unit] = Future {
-    Try(config.getConfigList("sessions")).map { sessions =>
-      sessions.foreach(entry =>
-        register(
-          entry.getString("name"),
-          entry.getString("master"),
-          entry.getConfig("conf"),
-          packages
-        )
+    config.getConfigList("api-server.sessions").foreach { entry =>
+      register(
+        entry.getString("name"),
+        entry.getString("master"),
+        entry.getConfig("conf"),
+        packages
       )
     }
   }

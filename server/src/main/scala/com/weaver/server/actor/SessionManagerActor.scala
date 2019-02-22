@@ -19,11 +19,12 @@ class SessionManagerActor extends Actor
 
   override def receive: Receive = {
     case SessionManagerActor.SetUp =>
-      SessionManager.setUp(context.system.settings.config.getConfig("api-server"), PackageManager.list)
+      SessionManager.setUp(context.system.settings.config, PackageManager.list)
         .map(_ => SessionManagerActor.SetUpCompleted)
         .recover {
           case e: Throwable => SessionManagerActor.SetUpFailed(e)
-        }.pipeTo(sender)
+        }
+        .pipeTo(sender)
     case _ =>
       log.error("Unknown message received!")
   }

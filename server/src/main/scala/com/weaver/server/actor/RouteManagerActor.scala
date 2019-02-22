@@ -20,12 +20,13 @@ class RouteManagerActor extends Actor
   override def receive: Receive = {
     case RouteManagerActor.SetUp =>
       RouteManager
-        .setUp(context.system.settings.config.getConfig("api-server"))
+        .setUp
         .map(_ => RouteManagerActor.SetUpCompleted)
         .recover {
           case e: Throwable =>
             RouteManagerActor.SetUpFailed(e)
-        }.pipeTo(sender)
+        }
+        .pipeTo(sender)
     case _ =>
       log.error("Unknown message received!")
   }

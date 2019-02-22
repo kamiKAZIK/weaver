@@ -20,12 +20,13 @@ class PackageManagerActor extends Actor
   override def receive: Receive = {
     case PackageManagerActor.SetUp =>
       PackageManager
-        .setUp(context.system.settings.config.getConfig("api-server"))
+        .setUp(context.system.settings.config)
         .map(_ => PackageManagerActor.SetUpCompleted)
         .recover {
           case e: Throwable =>
             PackageManagerActor.SetUpFailed(e)
-        }.pipeTo(sender)
+        }
+        .pipeTo(sender)
     case _ =>
       log.error("Unknown message received!")
   }
