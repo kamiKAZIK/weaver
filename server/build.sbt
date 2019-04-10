@@ -1,18 +1,12 @@
-
 name := "server"
-organization := "com.kami.weaver"
-
-version := "0.1-SNAPSHOT"
-
-scalaVersion := "2.11.12"
 
 libraryDependencies ++= Seq(
-  "com.typesafe.slick" %% "slick" % "3.2.3",
-  "com.typesafe.slick" %% "slick-hikaricp" % "3.2.3",
-  "org.apache.logging.log4j" % "log4j-api" % "2.11.1",
-  "org.apache.logging.log4j" % "log4j-slf4j-impl" % "2.11.1",
-  "io.argonaut" %% "argonaut" % "6.2.2",
-  "de.heikoseeberger" %% "akka-http-argonaut" % "1.22.0",
-  "org.apache.spark" %% "spark-sql" % "2.4.0",
-  "com.h2database" % "h2" % "1.4.197" % Runtime
+  "com.typesafe.slick" %% "slick" % versions.value.slick,
+  "com.typesafe.slick" %% "slick-hikaricp" % versions.value.slick,
+  "org.apache.logging.log4j" % "log4j-api" % versions.value.log4j,
+  "org.apache.logging.log4j" % "log4j-slf4j-impl" % versions.value.log4j,
+  "io.argonaut" %% "argonaut" % versions.value.argonaut,
+  "de.heikoseeberger" %% "akka-http-argonaut" % versions.value.akkaHttpArgonaut,
+  "org.apache.spark" %% "spark-sql" % versions.value.sparkSql,
+  "com.h2database" % "h2" % versions.value.h2 % Runtime
 )

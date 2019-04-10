@@ -1,21 +1,17 @@
-name := "weaver"
-organization := "com.weaver"
-
-version := "0.1-SNAPSHOT"
-
-scalaVersion := "2.11.12"
-
-publishArtifact := false
-
 lazy val root = Project("weaver", file("."))
-  .aggregate(executionApi, server, example)
+  .settings(Common.settings)
+  .settings(
+    name := "weaver",
+    publishArtifact := false
+  )
+  .aggregate(executionApi, server)
 
 lazy val executionApi = Project("execution-api", file("execution-api"))
+  .settings(Common.settings)
 
 lazy val restApi = Project("rest-api", file("rest-api"))
+  .settings(Common.settings)
 
-lazy val server = Project("server", file("server"))
+lazy val server = project.in(file("server"))
+  .settings(Common.settings)
   .dependsOn(executionApi, restApi)
-
-lazy val example = Project("example", file("example"))
-  .dependsOn(executionApi)
