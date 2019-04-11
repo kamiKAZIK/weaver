@@ -1,4 +1,4 @@
-import sbt.{Def, _}
+import sbt._
 
 object DependencyVersionProvider extends AutoPlugin {
   override def trigger: PluginTrigger = allRequirements
@@ -6,10 +6,4 @@ object DependencyVersionProvider extends AutoPlugin {
   object autoImport {
     lazy val versions = settingKey[VersionRegistry]("Bundles dependency versions")
   }
-
-  import autoImport._
-
-  override def projectSettings: Seq[Def.Setting[_]] = Seq(
-    versions := VersionRegistry
-  )
 }

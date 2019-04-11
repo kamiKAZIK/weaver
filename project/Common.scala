@@ -3,8 +3,8 @@ import sbt._
 
 object Common {
   lazy val settings: Seq[Setting[_]] = Seq(
-    organization := "com.pointlogic",
+    organization := "com.kami",
     version := "0.1-SNAPSHOT",
-    scalaVersion := VersionRegistry.scalaVersion,
+    scalaVersion := WeaverVersionRegistry.get("scala"),
   )
 }
