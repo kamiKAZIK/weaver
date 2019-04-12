@@ -13,6 +13,12 @@ trait ExecutionsRepository extends ExecutionsTable { this: DatabaseProvider =>
 
   def insert(execution: Execution): Future[Int] = db.run(executions += execution)
 
+  def markAsSucceeded(execution: Execution): Future[Int] =
+    markState(execution, completed = true, succeeded = true)
+
+  def markAsFailed(execution: Execution): Future[Int] =
+    markState(execution, completed = true, succeeded = false)
+
   def findAll: Future[Seq[Execution]] = db.run(executions.result)
 
   def findById(id: UUID)(implicit executionContext: ExecutionContext): Future[Option[Execution]] = db
@@ -21,6 +27,11 @@ trait ExecutionsRepository extends ExecutionsTable { this: DatabaseProvider =>
 
   def deleteOlderThan(timestamp: LocalDateTime): Future[Int] = db
     .run(executions.filter(_.endTime < timestamp).delete)
+
+  private[this] def markState(execution: Execution, completed: Boolean, succeeded: Boolean): Future[Int] =
+    db.run(executions.filter(_.id === execution.id)
+      .map(r => (r.endTime, r.completed, r.succeeded))
+      .update((Some(LocalDateTime.now()), completed, succeeded)))
 }
 
 object ExecutionsRepository extends ExecutionsRepository with DatabaseProvider with DatabaseConfiguration

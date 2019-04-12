@@ -1,19 +1,18 @@
 package com.weaver.api.rest.response
 
-import argonaut.Argonaut._
-import argonaut._
+import io.circe._
+import io.circe.generic.semiauto._
 
 case class SearchBinaries(binaries: List[SearchBinaries.Binary])
 
 object SearchBinaries {
-  case class Binary(id: Long, name: String, version: String)
+  case class Binary(uri: String)
 
   case object Binary {
-    implicit def BinaryCodecJson: CodecJson[Binary] =
-      casecodec3(Binary.apply, Binary.unapply)("id", "name", "version")
+    implicit val binaryEncoder: Encoder[Binary] = deriveEncoder
+    implicit val binaryDecoder: Decoder[Binary] = deriveDecoder
   }
 
-  implicit def SearchBinariesCodecJson: CodecJson[SearchBinaries] =
-    casecodec1(SearchBinaries.apply, SearchBinaries.unapply)("binaries")
+  implicit val searchBinariesEncoder: Encoder[SearchBinaries] = deriveEncoder
+  implicit val searchBinariesDecoder: Decoder[SearchBinaries] = deriveDecoder
 }
-

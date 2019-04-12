@@ -7,11 +7,11 @@ import com.typesafe.config.Config
 import scala.collection.JavaConversions._
 import scala.concurrent.{ExecutionContext, Future}
 
-object PackageManager {
-  private val registry: CopyOnWriteArraySet[String] = new CopyOnWriteArraySet
+trait PackageManager {
+  protected[this] def registry: CopyOnWriteArraySet[String]
 
   def setUp(config: Config)(implicit executionContext: ExecutionContext): Future[Unit] = Future {
-    config.getConfigList("api-server.packages").foreach { entry =>
+    config.getConfigList("packages").foreach { entry =>
       register(entry.getString("url"))
     }
   }

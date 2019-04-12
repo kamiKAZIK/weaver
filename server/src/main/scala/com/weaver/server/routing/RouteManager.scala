@@ -8,17 +8,20 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 import akka.event.Logging.LogLevel
 import akka.event.{Logging, LoggingAdapter}
+import akka.http.javadsl.server.CustomRejection
 import akka.http.scaladsl.model.HttpRequest
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.RouteResult.{Complete, Rejected}
-import akka.http.scaladsl.server.{Route, RouteResult}
+import akka.http.scaladsl.server.directives.BasicDirectives.{extractRequestContext, mapRouteResult}
+import akka.http.scaladsl.server._
 import akka.http.scaladsl.server.directives.{DebuggingDirectives, LogEntry, LoggingMagnet}
 import com.weaver.execution.api.ExecutionProvider
-import com.weaver.server.persistence.model.Execution
+import com.weaver.server.persistence.model.{Execution, ExecutionsRepository}
 import com.weaver.server.spark.{PackageManager, SessionManager}
 
 import scala.collection.JavaConversions._
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 object RouteManager {
   private val registry: ConcurrentLinkedQueue[Route] = new ConcurrentLinkedQueue[Route]
@@ -32,31 +35,44 @@ object RouteManager {
     }))
   }
 
-  def routes: Route = DebuggingDirectives.logRequestResult(LoggingMagnet(persistTimes)) {
+  def routes(implicit executionContext: ExecutionContext): Route = logExecution(executionContext) {
     registry.toSeq.reduce(_ ~ _)
   }
 
   def register(route: Route): Unit = registry.add(route)
 
-  private def timesLogger(loggingAdapter: LoggingAdapter, requestTimestamp: LocalDateTime)
-                         (request: HttpRequest)
-                         (result: RouteResult): Unit = {
-    val responseTimestamp = LocalDateTime.now()
-    val (entry, execution) = result match {
-      case Complete(response) =>
-        val elapsedTime = requestTimestamp.until(responseTimestamp, ChronoUnit.MILLIS)
-        LogEntry(s"Logged Request:${request.method}:${request.uri}:${response.status}:$elapsedTime") ->
-          Execution(UUID.randomUUID(), request.uri.toString, requestTimestamp, responseTimestamp, succeeded = true)
-      case Rejected(reason) =>
-        LogEntry(s"Rejected Reason: ${reason.mkString(",")}") ->
-          Execution(UUID.randomUUID(), request.uri.toString, requestTimestamp, responseTimestamp, succeeded = false)
+  private[this] def logExecution(implicit executionContext: ExecutionContext): Directive[Unit] =
+    extractRequestContext.flatMap { ctx =>
+      val execution = Execution(method = ctx.request.method.value, uri = ctx.request.uri.toString)
+      onSuccess(ExecutionsRepository.insert(execution)).flatMap { r =>
+        mapRouteResultFuture { result =>
+          result.flatMap {
+            case Complete(_) =>
+              ExecutionsRepository.markAsSucceeded(execution)
+                .flatMap(_ => result)
+            case Rejected(_) =>
+              ExecutionsRepository.markAsFailed(execution)
+                .flatMap(_ => result)
+          }
+        }
+      }
     }
-    println(execution)
-    entry.logTo(loggingAdapter)
-  }
-
-  private def persistTimes(log: LoggingAdapter): HttpRequest => RouteResult => Unit = {
-    val requestTimestamp = LocalDateTime.now()
-    timesLogger(log, requestTimestamp)
-  }
 }
+
+
+/*def routes(implicit executionContext: ExecutionContext) =
+  extractRequestContext.flatMap { ctx =>
+    val execution = Execution(method = ctx.request.method.value, uri = ctx.request.uri.toString)
+    onSuccess(ExecutionsRepository.insert(execution)).flatMap { r =>
+      mapRouteResultFuture { result =>
+        result.flatMap {
+          case Complete(_) =>
+            ExecutionsRepository.markAsSucceeded(execution)
+              .flatMap(_ => result)
+          case Rejected(_) =>
+            ExecutionsRepository.markAsFailed(execution)
+              .flatMap(_ => result)
+        }
+      }
+    }
+  }*/

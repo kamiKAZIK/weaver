@@ -11,7 +11,7 @@ object SessionManager {
   val registry: TrieMap[String, SessionManager] = TrieMap.empty
 
   def setUp(config: Config, packages: Set[String])(implicit executionContext: ExecutionContext): Future[Unit] = Future {
-    config.getConfigList("api-server.sessions").foreach { entry =>
+    config.getConfigList("sessions").foreach { entry =>
       register(
         entry.getString("name"),
         entry.getString("master"),
